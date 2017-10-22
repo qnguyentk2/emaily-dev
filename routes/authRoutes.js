@@ -9,7 +9,7 @@ module.exports = (app) => {
 
     app.get('/api/logout', (req, res) => {
         req.logout(); // this function is from passport, but this didn't remove cookie
-        res.send("You are logged out!!");
+        res.send(req.user);
     });
 
     app.get('/api/current_user', (req, res) => {
