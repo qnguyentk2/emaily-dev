@@ -25,25 +25,44 @@ passport.use(
             clientSecret: keys.googleClientSecret,
             callbackURL: '/auth/google/callback'
         }, 
-        (accessToken, refreshToken, profile, done) => {
-            User.findOne({ googleId: profile.id }) // this function will return a promise 
-                .then((existingUser) => {
-                    if(existingUser) {
-                        // we already have a record with the given profile.id
-                        // call done after login success
-                        done(null, existingUser); // null(no error) => error object
-                    } else {
-                        // accause is not existed 
-                        // after login success, take googleId from profile and save it to MongoDB
-                        new User({ 
-                            googleId : profile.id,
-                            userName: profile.displayName,
-                            fullName: profile.name.familyName + " " + profile.name.givenName
-                        }).save() // save() => save the module and its instance to MongoDB
-                            .then(user => done(null, user)); // user => new user
-                    }
-                });
+        async (accessToken, refreshToken, profile, done) => {
+            const existingUser =  await User.findOne({ googleId: profile.id }) // this function will return a promise 
+            if(existingUser) {
+                // we already have a record with the given profile.id
+                // call done after login success
+                return done(null, existingUser); // null(no error) => error object
+            } 
+            
+            // accause is not existed 
+            // after login success, take googleId from profile and save it to MongoDB
+            const user = await new User({ 
+                googleId : profile.id,
+                userName: profile.displayName,
+                fullName: profile.name.familyName + " " + profile.name.givenName
+            }).save() // save() => save the module and its instance to MongoDB
+            done(null, user); // user => new user
             
         }
     )
 );
+
+// (accessToken, refreshToken, profile, done) => {
+//     User.findOne({ googleId: profile.id }) // this function will return a promise 
+//         .then((existingUser) => {
+//             if(existingUser) {
+//                 // we already have a record with the given profile.id
+//                 // call done after login success
+//                 done(null, existingUser); // null(no error) => error object
+//             } else {
+//                 // accause is not existed 
+//                 // after login success, take googleId from profile and save it to MongoDB
+//                 new User({ 
+//                     googleId : profile.id,
+//                     userName: profile.displayName,
+//                     fullName: profile.name.familyName + " " + profile.name.givenName
+//                 }).save() // save() => save the module and its instance to MongoDB
+//                     .then(user => done(null, user)); // user => new user
+//             }
+//         });
+    
+// }
